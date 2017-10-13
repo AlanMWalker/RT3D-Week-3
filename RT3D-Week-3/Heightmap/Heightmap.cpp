@@ -58,16 +58,16 @@ bool HeightMapApplication::HandleStart()
 	//const INT ArraySize = Width * Width;
 	const INT ArraySize = (Width - 1) * Width * 2;
 
-	m_HeightMapVtxCount = ArraySize;//m_HeightMapWidth * m_HeightMapWidth * 6;
+	m_HeightMapVtxCount = m_HeightMapWidth * m_HeightMapWidth * 6;
 	m_pMapVtxs = new Vertex_Pos3fColour4ubNormal3f[m_HeightMapVtxCount];
 
 	INT vertInd = 0;
-
 	XMFLOAT3 normals[2];
 	XMVECTOR tempVec;
 
-	bool headingBack = false;
-	INT triangleCount = 0;
+	m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[0], MAP_COLOUR, normals[0]);
+	++vertInd;
+
 	for (INT i = 0; i < Width - 1; ++i)
 	{
 		for (INT j = 0; j < Width - 1; ++j)
@@ -99,40 +99,22 @@ bool HeightMapApplication::HandleStart()
 
 			}
 
-			if (i % 2 == 0)
+			if((j == 0 && i > 0))
 			{
 				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
-				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, normals[0]);
-				m_pMapVtxs[vertInd + 2] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1], MAP_COLOUR, normals[0]);
-			}
-			else
-			{
-				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1], MAP_COLOUR, normals[0]);
-				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, normals[0]);
-				m_pMapVtxs[vertInd + 2] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
+				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
+				vertInd += 2;
 			}
 
-			//m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
-			//m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, normals[0]);
-			//m_pMapVtxs[vertInd + 2] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1], MAP_COLOUR, normals[0]);
-			//
-			//m_pMapVtxs[vertInd + 3] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1], MAP_COLOUR, normals[1]);
-			//m_pMapVtxs[vertInd + 4] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, normals[1]);
-			//m_pMapVtxs[vertInd + 5] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width + 1], MAP_COLOUR, normals[1]);
-			if (triangleCount % (Width - 1) == 0)
-			{
-				headingBack = !headingBack;
-			}
-
-			++triangleCount;
+			m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, normals[0]);
+			m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1], MAP_COLOUR, normals[0]);
 			vertInd += 2;
 
-
-			if (triangleCount % Width == 0 && triangleCount < (Width * Width * 2))
+			if (j == Width - 2)
 			{
-				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1 + Width], MAP_COLOUR, normals[0]);
-				m_pMapVtxs[vertInd + 2] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + 1 + Width + Width], MAP_COLOUR, normals[0]);
-				vertInd += 1;
+				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width + 1], MAP_COLOUR, normals[0]);
+				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width + 1], MAP_COLOUR, normals[0]);
+				vertInd += 2;
 			}
 
 		}
@@ -206,7 +188,8 @@ void HeightMapApplication::HandleRender()
 		s_count = 3;
 	}
 
-	this->DrawUntexturedLit(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, m_pHeightMapBuffer, NULL, s_count);
+	//this->DrawUntexturedLit(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, m_pHeightMapBuffer, NULL, s_count);
+	this->DrawUntexturedLit(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, m_pHeightMapBuffer, NULL, m_HeightMapVtxCount);
 }
 
 //////////////////////////////////////////////////////////////////////
