@@ -24,13 +24,16 @@ protected:
 	bool LoadHeightMap(char* filename, float gridSize);
 
 private:
-	ID3D11Buffer *m_pHeightMapBuffer;
+
+	XMFLOAT3 getTriangleNormal(INT vertIndex);
+
+	ID3D11Buffer *m_pHeightMapBuffer = nullptr;
 	float m_rotationAngle;
 	int m_HeightMapWidth;
 	int m_HeightMapLength;
 	int m_HeightMapVtxCount;
 	XMFLOAT3* m_pHeightMap; // populated by LoadHeightMap();
-	Vertex_Pos3fColour4ubNormal3f* m_pMapVtxs;
+	Vertex_Pos3fColour4ubNormal3f* m_pMapVtxs = nullptr;
 	float m_cameraZ;
 };
 
@@ -45,12 +48,14 @@ bool HeightMapApplication::HandleStart()
 
 	m_cameraZ = 50.0f;
 
-	m_pHeightMapBuffer = NULL;
+	m_pHeightMapBuffer = nullptr;
 
 	m_rotationAngle = 0.f;
 
 	if (!this->CommonApp::HandleStart())
+	{
 		return false;
+	}
 
 	static const VertexColour MAP_COLOUR(200, 255, 255, 255);
 
@@ -74,32 +79,7 @@ bool HeightMapApplication::HandleStart()
 		{
 			const INT idx = i + j * Width;
 
-			// Normal calculations for each of the two triangles that makes up one quad
-			{
-				// get 2 vectors in the plane and calculate their cross product
-				tempVec = XMVector3Cross(
-					XMLoadFloat3(&m_pHeightMap[idx]) - XMLoadFloat3(&m_pHeightMap[idx + Width]),
-					XMLoadFloat3(&m_pHeightMap[idx]) - XMLoadFloat3(&m_pHeightMap[idx + Width + 1]));
-
-				XMStoreFloat3(&normals[0], tempVec);
-
-				// get 2 vectors in the plane and calculate their cross product
-				tempVec = XMVector3Cross(
-					XMLoadFloat3(&m_pHeightMap[idx + 1]) - XMLoadFloat3(&m_pHeightMap[idx + Width]),
-					XMLoadFloat3(&m_pHeightMap[idx + 1]) - XMLoadFloat3(&m_pHeightMap[idx + Width + 1]));
-
-				XMStoreFloat3(&normals[1], tempVec);
-
-				for (INT z = 0; z < 2; ++z)
-				{
-					tempVec = XMLoadFloat3(&normals[z]);
-					XMVector3Normalize(tempVec);
-					XMStoreFloat3(&normals[z], tempVec);
-				}
-
-			}
-
-			if((j == 0 && i > 0))
+			if ((j == 0 && i > 0))
 			{
 				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
 				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, normals[0]);
@@ -118,6 +98,20 @@ bool HeightMapApplication::HandleStart()
 			}
 
 		}
+	}
+
+	for (INT vertexIndex = 0; vertexIndex < ArraySize; vertexIndex += 2)
+	{
+		const XMFLOAT3 normal = getTriangleNormal(vertexIndex);
+
+		m_pMapVtxs[vertexIndex].normal = *((D3DVECTOR*)&normal);
+		m_pMapVtxs[vertexIndex + 1].normal = *((D3DVECTOR*)&normal);
+		
+		if (vertexIndex % 2 != 0)
+		{
+
+		}
+
 	}
 
 	m_pHeightMapBuffer = CreateImmutableVertexBuffer(m_pD3DDevice, sizeof Vertex_Pos3fColour4ubNormal3f * m_HeightMapVtxCount, m_pMapVtxs);
@@ -292,6 +286,22 @@ bool HeightMapApplication::LoadHeightMap(char* filename, float gridSize)
 	bitmapImage = 0;
 
 	return true;
+}
+
+XMFLOAT3 HeightMapApplication::getTriangleNormal(INT vertIndex)
+{
+	//Vectors a & B are the vectors in the plane, vecN is the normal as a result of the cross product calculation 
+	XMVECTOR vecA, vecB, vecN;
+	XMFLOAT3 vecR; // resultant cross product
+
+	vecA = XMLoadFloat3((XMFLOAT3*)&m_pMapVtxs[vertIndex + 1].pos) - XMLoadFloat3((XMFLOAT3*)&m_pMapVtxs[vertIndex].pos);
+	vecB = XMLoadFloat3((XMFLOAT3*)&m_pMapVtxs[vertIndex + 2].pos) - XMLoadFloat3((XMFLOAT3*)&m_pMapVtxs[vertIndex].pos);
+
+	vecN = XMVector3Cross(vecA, vecB);
+
+
+	XMStoreFloat3(&vecR, vecN);
+	return vecR;
 }
 
 
