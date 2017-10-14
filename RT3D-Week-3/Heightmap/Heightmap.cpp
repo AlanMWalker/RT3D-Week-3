@@ -109,10 +109,6 @@ bool HeightMapApplication::HandleStart()
 		{
 			const XMFLOAT3 normal = getTriangleNormal(vertIndex);
 
-			//m_pMapVtxs[vertIndex].normal = *((D3DVECTOR*)&normal);
-			//m_pMapVtxs[vertIndex + 1].normal = *((D3DVECTOR*)&normal);
-			//m_pMapVtxs[vertIndex + 2].normal = *((D3DVECTOR*)&normal);
-
 			if (((j == 0 && i > 0)) || j == Width - 2)
 			{
 				m_pMapVtxs[vertIndex].normal = *((D3DVECTOR*)&normal);
