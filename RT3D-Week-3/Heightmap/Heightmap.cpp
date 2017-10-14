@@ -25,7 +25,7 @@ protected:
 
 private:
 
-	XMFLOAT3 getTriangleNormal(INT vertIndex);
+	XMFLOAT3 getTriangleNormal(INT vertIndex) const;
 
 	ID3D11Buffer *m_pHeightMapBuffer = nullptr;
 	float m_rotationAngle;
@@ -60,8 +60,6 @@ bool HeightMapApplication::HandleStart()
 	static const VertexColour MAP_COLOUR(200, 255, 255, 255);
 
 	const INT Width = 256;
-	//const INT ArraySize = Width * Width;
-	const INT ArraySize = (Width - 1) * Width * 2;
 
 	m_HeightMapVtxCount = m_HeightMapWidth * m_HeightMapWidth * 6;
 	m_pMapVtxs = new Vertex_Pos3fColour4ubNormal3f[m_HeightMapVtxCount];
@@ -100,18 +98,41 @@ bool HeightMapApplication::HandleStart()
 		}
 	}
 
-	for (INT vertexIndex = 0; vertexIndex < ArraySize; vertexIndex += 2)
+	const auto AverageNormal = [](const XMFLOAT3& vecA, const XMFLOAT3& vecB)
 	{
-		const XMFLOAT3 normal = getTriangleNormal(vertexIndex);
-
-		m_pMapVtxs[vertexIndex].normal = *((D3DVECTOR*)&normal);
-		m_pMapVtxs[vertexIndex + 1].normal = *((D3DVECTOR*)&normal);
-		
-		if (vertexIndex % 2 != 0)
+		return XMFLOAT3((vecA.x + vecB.x) / 2.0f, (vecA.y + vecB.y) / 2.0f, (vecA.z + vecB.z) / 2.0f);
+	};
+	INT vertIndex = 0;
+	for (INT i = 0; i < Width - 1; ++i)
+	{
+		for (INT j = 0; j < Width - 1; ++j)
 		{
+			const XMFLOAT3 normal = getTriangleNormal(vertIndex);
 
+			//m_pMapVtxs[vertIndex].normal = *((D3DVECTOR*)&normal);
+			//m_pMapVtxs[vertIndex + 1].normal = *((D3DVECTOR*)&normal);
+			//m_pMapVtxs[vertIndex + 2].normal = *((D3DVECTOR*)&normal);
+
+			if (((j == 0 && i > 0)) || j == Width - 2)
+			{
+				m_pMapVtxs[vertIndex].normal = *((D3DVECTOR*)&normal);
+				m_pMapVtxs[vertIndex + 1].normal = *((D3DVECTOR*)&normal);
+				m_pMapVtxs[vertIndex + 2].normal = *((D3DVECTOR*)&normal);
+				vertIndex += 2;
+			}
+			else
+			{
+				const XMFLOAT3 prevNormal = *((XMFLOAT3*)&m_pMapVtxs[vertIndex - 2].normal);
+				const XMFLOAT3 avgNormal = AverageNormal(normal, prevNormal);
+
+				m_pMapVtxs[vertIndex].normal = *((D3DVECTOR*)&avgNormal);
+				m_pMapVtxs[vertIndex + 1].normal = *((D3DVECTOR*)&avgNormal);
+				m_pMapVtxs[vertIndex + 2].normal = *((D3DVECTOR*)&avgNormal);
+				
+			}
+
+			vertIndex += 2;
 		}
-
 	}
 
 	m_pHeightMapBuffer = CreateImmutableVertexBuffer(m_pD3DDevice, sizeof Vertex_Pos3fColour4ubNormal3f * m_HeightMapVtxCount, m_pMapVtxs);
@@ -288,7 +309,7 @@ bool HeightMapApplication::LoadHeightMap(char* filename, float gridSize)
 	return true;
 }
 
-XMFLOAT3 HeightMapApplication::getTriangleNormal(INT vertIndex)
+XMFLOAT3 HeightMapApplication::getTriangleNormal(INT vertIndex) const
 {
 	//Vectors a & B are the vectors in the plane, vecN is the normal as a result of the cross product calculation 
 	XMVECTOR vecA, vecB, vecN;
