@@ -448,22 +448,117 @@ XMFLOAT3 HeightMapApplication::getVertexNormal(INT xPos, INT yPos) const
 
 	case LeftBoundry:
 	{
+		pVecSize = 5;
+		pVectors = new XMVECTOR[pVecSize];
 
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[0] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[1] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[2] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[3] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[4] = tempA - tempB;
 	}
 	break;
 
 	case RightBoundry:
 	{
+		pVecSize = 5;
+		pVectors = new XMVECTOR[pVecSize];
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[0] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[1] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[2] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[3] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[4] = tempA - tempB;
 	}
 	break;
 
 	case TopBoundry:
 	{
+		pVecSize = 5;
+		pVectors = new XMVECTOR[pVecSize];
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[0] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[1] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[2] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos + 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[3] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[4] = tempA - tempB;
 	}
 	break;
 
 	case BottomBoundry:
 	{
+		pVecSize = 5;
+		pVectors = new XMVECTOR[pVecSize];
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[0] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[1] = tempA - tempB;
+
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos - 1, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[2] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos + 1, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[3] = tempA - tempB;
+
+		tempA = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos - 1, m_HeightMapWidth)]);
+		tempB = XMLoadFloat3(&m_pHeightMap[toIndex(xPos, yPos, m_HeightMapWidth)]);
+		pVectors[4] = tempA - tempB;
 	}
 	break;
 
@@ -522,6 +617,15 @@ XMFLOAT3 HeightMapApplication::getVertexNormal(INT xPos, INT yPos) const
 		averagedVec /= 2.0f;
 		break;
 	case 5:
+		
+		averagedVec += XMVector3Cross(pVectors[0], pVectors[1]);
+		averagedVec += XMVector3Cross(pVectors[0], pVectors[2]);
+		averagedVec += XMVector3Cross(pVectors[0], pVectors[3]);
+		averagedVec += XMVector3Cross(pVectors[0], pVectors[4]);
+		
+		
+		averagedVec /= 4;
+
 		break;
 	case 8:
 		for (int i = 0; i < pVecSize; i += 2)
