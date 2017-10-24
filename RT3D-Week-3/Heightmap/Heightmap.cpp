@@ -45,8 +45,8 @@ bool HeightMapApplication::HandleStart()
 	{
 		for (INT j = 0; j < m_HeightMapLength; ++j)
 		{
-			const INT index = i + j * m_HeightMapWidth;
-			pNormals[index] = getVertexNormal(i, j);
+			const INT index = j + i * m_HeightMapWidth;
+			pNormals[index] = getVertexNormal(j, i);
 		}
 	}
 	//-- NORMALS
@@ -61,9 +61,13 @@ bool HeightMapApplication::HandleStart()
 	{
 		for (INT j = 0; j < m_HeightMapLength - 1; ++j)
 		{
-			const INT idx = i + j * m_HeightMapWidth;
+			if (i == 0 && j == 0)
+			{
+				continue;
+			}
+			const INT idx = j + i * m_HeightMapWidth;
 
-			if ((j == 0 && i > 0))
+			if (j == 0 && i > 0)
 			{
 				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, pNormals[idx]);
 				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx], MAP_COLOUR, pNormals[idx]);
@@ -76,8 +80,8 @@ bool HeightMapApplication::HandleStart()
 
 			if (j == Width - 2)
 			{
-				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width + 1], MAP_COLOUR, pNormals[idx + Width + 1]);
-				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width + 1], MAP_COLOUR, pNormals[idx + Width + 1]);
+				m_pMapVtxs[vertInd] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, pNormals[idx + Width]);
+				m_pMapVtxs[vertInd + 1] = Vertex_Pos3fColour4ubNormal3f(m_pHeightMap[idx + Width], MAP_COLOUR, pNormals[idx + Width]);
 				vertInd += 2;
 			}
 
@@ -94,7 +98,7 @@ bool HeightMapApplication::HandleStart()
 
 	if (pNormals)
 	{
-		delete pNormals;
+		delete[] pNormals;
 		pNormals = nullptr;
 	}
 
@@ -617,27 +621,31 @@ XMFLOAT3 HeightMapApplication::getVertexNormal(INT xPos, INT yPos) const
 		averagedVec /= 2.0f;
 		break;
 	case 5:
-		
+
 		averagedVec += XMVector3Cross(pVectors[0], pVectors[1]);
-		averagedVec += XMVector3Cross(pVectors[0], pVectors[2]);
-		averagedVec += XMVector3Cross(pVectors[0], pVectors[3]);
+		averagedVec += XMVector3Cross(pVectors[2], pVectors[3]);
 		averagedVec += XMVector3Cross(pVectors[0], pVectors[4]);
-		
-		
-		averagedVec /= 4;
+		//averagedVec += XMVector3Cross(pVectors[0], pVectors[4]);
+
+
+		averagedVec /= 3.0f;
 
 		break;
 	case 8:
-		for (int i = 0; i < pVecSize; i += 2)
+		for (int i = 0; i < pVecSize; ++i)
 		{
-			averagedVec += XMVector3Cross(pVectors[i], pVectors[i + 1]);
+			if (i + 1 < pVecSize)
+			{
+				averagedVec += XMVector3Cross(pVectors[i], pVectors[i + 1]);
+			}
 		}
-		averagedVec /= (float)((pVecSize / 2));
+		averagedVec /= 8.0f;
 		break;
 	}
-	averagedVec = XMVector2Normalize(averagedVec);
+	averagedVec = XMVector4Normalize(averagedVec);
 
 	XMStoreFloat3(&averagedFloat3, averagedVec);
+	averagedFloat3.y = fabs(averagedFloat3.y);
 
 	delete[] pVectors;
 
